@@ -14,7 +14,7 @@ class UserRegisterView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        serializer = UserRegisterSerializers(data = request.data)
+        serializer = UserRegisterSerializers(data=request.data)
         
         if serializer.is_valid():
             user = serializer.save()
@@ -27,19 +27,19 @@ class UserRegisterView(APIView):
             }, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         
         
 class UserLoginView(APIView):
-    
     def post(self, request, *args, **kwargs):
-        serializer = UserLoginSerializers(data = request.data)
+        serializer = UserLoginSerializers(data=request.data)
         
         if serializer.is_valid():
-            user = serializer.validate_data['user']
+            user = serializer.validate_data['user']  # This should be 'user', not 'validate_data'
             refresh = RefreshToken.for_user(user)
             return Response({
-                "message" : "Login successful",
-                "access_token" : str(refresh.access_token),
-                "refresh_token" : str(refresh)
+                "message": "Login successful",
+                "access_token": str(refresh.access_token),
+                "refresh_token": str(refresh)
             }, status=status.HTTP_200_OK)
-        return Response(serialzer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

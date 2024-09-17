@@ -1,3 +1,5 @@
+import { createSlice } from '@reduxjs/toolkit';
+
 const initialState = {
     user: null,
     token: null,
@@ -5,33 +7,39 @@ const initialState = {
     error: null,
 };
 
-const authReducer = (state = initialState, action) => {
-    console.log(`this is action type: ${action.payload}`);
-    switch (action.type) {
-        case "LOGIN_SUCCESS":
-            return {
-                ...state,
-                user: action.payload.user,
-                token: action.payload.token,
-                loading: false,
-            };
-
-        case "LOGIN_FAIL":
+const authSlice = createSlice({
+    name: 'auth',
+    initialState,
+    reducers: {
+        loginSuccess: (state, action) => {
+            state.user = action.payload.user;
+            state.token = action.payload.token;
+            state.loading = false;
+        },
+        loginFail: (state, action) => {
             console.log("ERROR DURING LOGIN", action.payload);
-            return {
-                ...state,
-                error: action.payload,
-                loading: false,
-            };
-        case "LOGOUT":
-            return {
-                user: null,
-                token: null,
-                error: null,
-            };
-        default:
-            return state;
-    }
-};
+            state.error = action.payload;
+            state.loading = false;
+        },
 
-export default authReducer;
+        registerSuccess: (state, action) => {
+            state.user = action.payload;
+            state.loading = false;
+        },
+        registerFail: (state, action) => {
+            state.error = action.payload;
+            state.loading = false;
+        },
+        logout: (state) => {
+            state.user = null;
+            state.token = null;
+            state.error = null;
+        },
+        setLoading: (state, action) => {
+            state.loading = action.payload;
+        },
+    },
+});
+
+export const { loginSuccess, loginFail, logout, setLoading, registerSuccess, registerFail } = authSlice.actions;
+export default authSlice.reducer;

@@ -1,81 +1,73 @@
-import axiosInstance from "../utils/api";
 import axios from "axios";
-
-export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
-export const LOGIN_FAIL = "LOGIN_FAIL";
-export const REGISTER_SUCCESS = "REGISTER_SUCCESS";
-export const REGISTER_FAIL = "REGISTER_FAIL";
-export const LOGOUT = "LOGOUT";
-
-export const loginSuccess = (user, token) => ({
-    type: LOGIN_SUCCESS,
-    payload: { user, token },
-});
-
-export const registerSuccess = (user) => ({
-    type: REGISTER_SUCCESS,
-    payload: user,
-});
-
-export const registerFail = (error) => ({
-    type: REGISTER_FAIL,
-    payload: error,
-});
-
-export const loginFail = (error) => ({
-    type: LOGIN_FAIL,
-    payload: error,
-});
-
-export const logout = () => ({
-    type: LOGOUT,
-});
+import { loginSuccess, loginFail, registerSuccess, registerFail, logout } from "./reducers"; 
 
 export const loginUser = (userData) => async (dispatch) => {
-    console.log(`this is user data : ${userData.username} and ${userData.password}`);
+    console.log(`User Data: ${userData.username}, ${userData.password}`);
     try {
         const response = await axios.post("http://localhost:8000/api/login/", userData);
-        console.log(` this is the response of the login : ${response}`);
+        console.log(`Login Response:`, response);
 
         if (response.status === 200) {
             const { access_token, refresh_token, user } = response.data;
+
+            // Store tokens in localStorage
             localStorage.setItem("ACCESS_TOKEN", access_token);
             localStorage.setItem("REFRESH_TOKEN", refresh_token);
-            dispatch(loginSuccess(user, access_token));
-            console.log(`he is going....`);
+
+            dispatch(loginSuccess({ user: userData.username, token: access_token }));
+            console.log("Login Success Dispatched");
+
             return { success: true, data: user };
         } else {
-            const errorMsg = "Invalid username or password please try again.";
+            const errorMsg = "Invalid username or password. Please try again.";
             dispatch(loginFail(errorMsg));
-            return { error: { details: { general: errorMsg } } }; 
+            return { error: { details: { general: errorMsg } } };
         }
     } catch (error) {
-        console.error('Error logging in:', error);
+        console.error("Error logging in:", error);
         const errorMsg = error.response ? error.response.data : error.message;
-        dispatch(loginFail(errorMsg));
-        return { error: { details: errorMsg } }; // Return errors in a consistent format
+        dispatch(loginFail(errorMsg)); // Dispatch login failure
+        return { error: { details: errorMsg } };
     }
 };
-
 
 export const registerUser = (userData) => async (dispatch) => {
     try {
         const response = await axios.post("http://localhost:8000/api/register/", userData);
         const data = response.data;
+
         if (response.status === 201) {
-            const { access_token, refresh_token } = response.data;
+            const { access_token, refresh_token } = data;
+
+            // Store tokens in localStorage
             localStorage.setItem("ACCESS_TOKEN", access_token);
             localStorage.setItem("REFRESH_TOKEN", refresh_token);
+
+            // Dispatch registration success with user data
             dispatch(registerSuccess(data));
-            return {success : true, data};
+            return { success: true, data };
         } else {
-            throw new Error("Registration failed please try again later.");
+            throw new Error("Registration failed, please try again later.");
         }
     } catch (error) {
-        const errorMsg = error.response?.data?.error || "Registration failed";
-        dispatch(registerFail(errorMsg));
+        const errorMsg = error.response?.data?.error || "Registration failed.";
+        dispatch(registerFail(errorMsg)); // Dispatch registration failure
 
+        return { error: { message: errorMsg, details: error.message } };
+    }
+};
 
-        return { error: { message: errorMsg, details: errorDetails } };
+export const logoutUser = () => async (dispatch) => {
+    try {
+        // Clear tokens from localStorage
+        localStorage.removeItem("ACCESS_TOKEN");
+        localStorage.removeItem("REFRESH_TOKEN");
+
+        // Dispatch logout action
+        dispatch(logout());
+        return { success: true };
+    } catch (error) {
+        console.error("Error logging out:", error);
+        return { error: error.message };
     }
 };

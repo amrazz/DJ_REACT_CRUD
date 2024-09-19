@@ -18,16 +18,6 @@ const Form = ({ method }) => {
 
   const isLogin = method === "login";
 
-  useEffect(() => {
-    if (token) {
-      if (isLogin) {
-        navigate("/");
-      } else {
-        navigate("/login");
-      }
-    }
-  }, [token, navigate, isLogin]);
-
   const isValidEmail = (email) => {
     return /\S+@\S+\.\S+/.test(email);
   };
@@ -93,8 +83,9 @@ const Form = ({ method }) => {
         console.log(`he is arrived here`);
 
         if (result && result.success) {
-          console.log("Navigating to /home");
-          navigate("/home"); // Make sure this is the correct path
+          console.log("Navigating to /");
+          navigate("/");
+          console.log(`not navigating to /`);
         } else if (result && result.error) {
           setErrors(
             result.error.details || {
@@ -106,7 +97,7 @@ const Form = ({ method }) => {
         const result = await dispatch(registerUser(registrationData));
 
         if (result && result.success) {
-          navigate("/home"); // Make sure this is the correct path
+          navigate("/login");
         } else if (result && result.error) {
           const apiErrors = result.error.details || {};
           const formErrors = {};
@@ -137,36 +128,43 @@ const Form = ({ method }) => {
             </h1>
             <div className="grid grid-cols-1 gap-5 w-full">
               {!isLogin && (
-                <>
-                  <div className="flex items-center gap-3 border-b border-black py-2">
-                    <i className="fa-solid fa-user mr-2"></i>
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="First name"
-                      className="focus:outline-none w-full tracking-widest"
-                      required
-                    />
+                <div className="flex gap-4">
+                  {/* First Name */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 border-b border-black py-2">
+                      <i className="fa-solid fa-user mr-2"></i>
+                      <input
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="First name"
+                        className="focus:outline-none w-full tracking-widest"
+                        required
+                      />
+                    </div>
+                    {errors.firstName && (
+                      <p className="text-red-500 text-xs">{errors.firstName}</p>
+                    )}
                   </div>
-                  {errors.firstName && (
-                    <p className="text-red-500 text-xs">{errors.firstName}</p>
-                  )}
-                  <div className="flex items-center gap-3 border-b border-black py-2">
-                    <i className="fa-solid fa-user mr-2"></i>
-                    <input
-                      type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      placeholder="Last name"
-                      className="focus:outline-none w-full tracking-widest"
-                      required
-                    />
+
+                  {/* Last Name */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 border-b border-black py-2">
+                      <i className="fa-solid fa-user mr-2"></i>
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Last name"
+                        className="focus:outline-none w-full tracking-widest"
+                        required
+                      />
+                    </div>
+                    {errors.lastName && (
+                      <p className="text-red-500 text-xs">{errors.lastName}</p>
+                    )}
                   </div>
-                  {errors.lastName && (
-                    <p className="text-red-500 text-xs">{errors.lastName}</p>
-                  )}
-                </>
+                </div>
               )}
               <div className="flex items-center gap-3 border-b border-black py-2">
                 <i className="fa-solid fa-user mr-2"></i>
